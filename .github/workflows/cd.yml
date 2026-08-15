@@ -1,0 +1,38 @@
+name: CD Gateway Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Gateway to CIn VM
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout or Update Repository
+        run: |
+          GATEWAY_DIR="$HOME/incinera-gateway"
+          if [ ! -d "$GATEWAY_DIR" ]; then
+            git clone https://github.com/Atletica-Incinera/incinera-gateway.git "$GATEWAY_DIR"
+          fi
+          cd "$GATEWAY_DIR"
+          git fetch --all
+          git reset --hard origin/main
+
+      - name: Ensure Network & Validate Config
+        run: |
+          cd "$HOME/incinera-gateway"
+          chmod +x scripts/*.sh
+          ./scripts/init-vm.sh
+          ./scripts/validate-config.sh
+
+      - name: Apply Nginx Reload or Recreate
+        run: |
+          cd "$HOME/incinera-gateway"
+          docker compose up -d --remove-orphans
+          # Recarrega Nginx se já estiver de pé sem interrupção de conexões
+          docker exec incinera-gateway nginx -s reload || true
+          echo "Gateway Nginx atualizado e ativo!"
