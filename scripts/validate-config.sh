@@ -6,6 +6,9 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 echo "==> Validando sintaxe da configuração do Nginx..."
 docker run --rm \
+  --add-host incinera-web:127.0.0.1 \
+  --add-host pwa-torneios-web:127.0.0.1 \
+  --add-host intereng-api:127.0.0.1 \
   -v "${ROOT_DIR}/nginx/nginx.conf:/etc/nginx/nginx.conf:ro" \
   -v "${ROOT_DIR}/nginx/conf.d:/etc/nginx/conf.d:ro" \
   -v "${ROOT_DIR}/nginx/includes:/etc/nginx/includes:ro" \
